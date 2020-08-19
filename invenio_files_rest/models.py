@@ -33,7 +33,7 @@ have their own model, but are represented via the :py:data:`ObjectVersion`
 model.
 """
 
-from __future__ import absolute_import, print_function
+from __future__ import absolute_import, annotations, print_function
 
 import mimetypes
 import re
@@ -42,6 +42,7 @@ import uuid
 from datetime import datetime
 from functools import wraps
 from os.path import basename
+from typing import TYPE_CHECKING
 
 import six
 from flask import current_app
@@ -59,6 +60,9 @@ from .errors import BucketLockedError, FileInstanceAlreadySetError, \
     MultipartInvalidSize, MultipartMissingParts, MultipartNotCompleted
 from .proxies import current_files_rest
 from .utils import ENCODING_MIMETYPES, guess_mimetype
+
+if TYPE_CHECKING:
+    from .storage import FileStorage
 
 slug_pattern = re.compile('^[a-z][a-z0-9-]+$')
 
@@ -740,7 +744,7 @@ class FileInstance(db.Model, Timestamp):
         self.query.filter_by(id=self.id).delete()
         return self
 
-    def storage(self, **kwargs):
+    def storage(self, **kwargs) -> FileStorage:
         """Get storage interface for object.
 
         Uses the applications storage factory to create a storage interface
